@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wedding Invitation | Vinit & Karuna</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Great Vibes, Cinzel Decorative, Cormorant Garamond, Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Great+Vibes&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            royal: {
+              cream: '#FDFBF7',
+              beige: '#F5EFEB',
+              maroon: '#6A1528',
+              deepMaroon: '#4A0D1B',
+              ruby: '#861B33',
+              gold: '#D4AF37',
+              lightGold: '#F3E5AB',
+              darkGold: '#AA820A',
+              emerald: '#1C4A3E'
+            }
+          },
+          fontFamily: {
+            script: ['"Great Vibes"', 'cursive'],
+            royal: ['"Cinzel Decorative"', 'serif'],
+            serif: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Montserrat"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar & Aesthetics */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FDFBF7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D4AF37;
+      border-radius: 10px;
+    }
+
+    /* Shimmer Effect for Gold Accents */
+    @keyframes goldShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #B38728 0%, #FBF5B7 25%, #DAA520 50%, #AA771C 75%, #FBF5B7 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: goldShimmer 5s linear infinite;
+    }
+    
+    .gold-border-glow {
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+    }
+
+    /* Floating Petals / Diyas Background */
+    @keyframes floatPetal {
+      0% {
+        transform: translateY(-20px) rotate(0deg) translateX(0);
+        opacity: 0;
+      }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      100% {
+        transform: translateY(105vh) rotate(360deg) translateX(50px);
+        opacity: 0;
+      }
+    }
+    .petal {
+      position: fixed;
+      pointer-events: none;
+      z-index: 40;
+      animation: floatPetal linear infinite;
+    }
+
+    /* Wax Seal Pulse */
+    @keyframes sealPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(186, 28, 56, 0.6); }
+      50% { transform: scale(1.05); box-shadow: 0 0 20px 8px rgba(212, 175, 55, 0.4); }
+    }
+    .wax-pulse {
+      animation: sealPulse 2.4s infinite ease-in-out;
+    }
+
+    /* Mandala Rotating */
+    @keyframes spinMandala {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spin-slow {
+      animation: spinMandala 60s linear infinite;
+    }
+
+    /* Custom Envelope Lid Folding */
+    .envelope-flap {
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: top;
+    }
+    .envelope-open .envelope-flap {
+      transform: rotateX(180deg);
+    }
+  </style>
+</head>
+<body class="bg-royal-beige text-stone-800 font-sans antialiased overflow-x-hidden selection:bg-royal-gold selection:text-white">
+
+  <!-- Floating Audio Controller Floating Icon -->
+  <div class="fixed top-4 right-4 z-50 flex items-center space-x-2">
+    <button id="musicToggleBtn" class="w-11 h-11 rounded-full bg-royal-maroon/90 text-royal-lightGold border border-royal-gold/60 shadow-lg flex items-center justify-center backdrop-blur-md active:scale-95 transition-all">
+      <i id="musicIcon" class="fa-solid fa-music text-sm animate-pulse"></i>
+    </button>
+  </div>
+
+  <!-- Petals Background Container -->
+  <div id="petalsContainer" class="fixed inset-0 pointer-events-none overflow-hidden z-20"></div>
+
+  <!-- ============================================== -->
+  <!-- 1. ENVELOPE / WAX SEAL OPENING SCREEN MODAL -->
+  <!-- ============================================== -->
+  <div id="envelopeModal" class="fixed inset-0 z-50 flex items-center justify-center bg-royal-deepMaroon/95 backdrop-blur-md p-4 transition-opacity duration-700">
+    <div class="relative w-full max-w-md flex flex-col items-center text-center">
+      
+      <!-- Royal Mandala Watermark -->
+      <div class="absolute -top-24 w-72 h-72 opacity-15 spin-slow pointer-events-none">
+        <svg viewBox="0 0 100 100" class="w-full h-full fill-royal-gold">
+          <circle cx="50" cy="50" r="45" stroke="#D4AF37" stroke-width="1" fill="none"/>
+          <path d="M50 0 L55 35 L90 15 L65 45 L100 50 L65 55 L90 85 L55 65 L50 100 L45 65 L10 85 L35 55 L0 50 L35 45 L10 15 L45 35 Z" />
+        </svg>
+      </div>
+
+      <!-- Envelope Simulation Card -->
+      <div class="relative w-full bg-[#fdfbf7] rounded-2xl shadow-2xl border-2 border-royal-gold/40 p-6 md:p-8 overflow-hidden z-10">
+        <!-- Golden Border Filigree Corners -->
+        <div class="absolute top-2 left-2 text-royal-gold/80 text-lg">❧</div>
+        <div class="absolute top-2 right-2 text-royal-gold/80 text-lg rotate-90">❧</div>
+        <div class="absolute bottom-2 left-2 text-royal-gold/80 text-lg -rotate-90">❧</div>
+        <div class="absolute bottom-2 right-2 text-royal-gold/80 text-lg rotate-180">❧</div>
+
+        <!-- Auspicious Symbol -->
+        <div class="mb-3 text-royal-maroon font-serif font-bold text-xl tracking-widest">
+          ॐ ॥ श्री गणेशाय नमः ॥ ॐ
+        </div>
+
+        <p class="text-xs uppercase tracking-[0.3em] text-royal-maroon font-semibold mb-2">You are cordially invited</p>
+        
+        <h2 class="font-royal text-2xl md:text-3xl text-royal-maroon leading-tight mb-2">
+          The Wedding Celebration
+        </h2>
+
+        <div class="font-script text-4xl text-royal-gold my-3">
+          Vinit <span class="text-2xl text-royal-maroon font-serif">&</span> Karuna
+        </div>
+
+        <p class="font-serif italic text-stone-600 text-sm md:text-base px-3 my-4">
+          "Two families, two hearts, uniting in an eternal bond of love and auspicious joy."
+        </p>
+
+        <!-- Tap to Open Seal Button -->
+        <div class="mt-6 flex flex-col items-center">
+          <button id="openInviteBtn" class="wax-pulse relative w-20 h-20 rounded-full bg-gradient-to-tr from-royal-maroon to-royal-ruby border-2 border-royal-gold flex flex-col items-center justify-center text-royal-lightGold shadow-xl group active:scale-95 transition-transform cursor-pointer">
+            <span class="text-2xl mb-0.5">💌</span>
+            <span class="text-[10px] font-sans font-bold uppercase tracking-wider text-royal-lightGold">OPEN</span>
+          </button>
+          <span class="text-xs text-stone-500 font-sans tracking-wide mt-3 animate-bounce">
+            Tap to open the royal invitation
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 2. MAIN INVITATION CONTENT (MOBILE FIRST) -->
+  <!-- ============================================== -->
+  <main id="mainInvite" class="min-h-screen max-w-md mx-auto bg-royal-cream shadow-2xl relative border-x border-royal-gold/20 pb-20">
+    
+    <!-- Top Ornamental Marigold & Mango Leaves Garland SVG Banner -->
+    <header class="relative w-full pt-8 pb-4 text-center px-4 bg-gradient-to-b from-[#FFF7EA] to-royal-cream border-b border-royal-gold/30">
+      
+      <!-- Decorative Top Arch -->
+      <div class="flex justify-center items-center space-x-3 mb-2">
+        <span class="h-[1px] w-12 bg-gradient-to-r from-transparent to-royal-gold"></span>
+        <span class="text-royal-maroon text-xs font-semibold tracking-widest uppercase">॥ शुभ विवाह ॥</span>
+        <span class="h-[1px] w-12 bg-gradient-to-l from-transparent to-royal-gold"></span>
+      </div>
+
+      <p class="font-serif text-xs md:text-sm uppercase tracking-[0.25em] text-royal-ruby font-semibold">
+        Together with their families
+      </p>
+
+      <!-- Couple Names in Script & Royal Font -->
+      <div class="my-3">
+        <h1 class="font-royal text-3xl sm:text-4xl text-royal-maroon font-bold tracking-tight">
+          VINIT
+        </h1>
+        <div class="flex items-center justify-center my-1 space-x-2">
+          <span class="h-[1px] w-16 bg-royal-gold/70"></span>
+          <span class="font-script text-3xl text-royal-gold px-2">weds</span>
+          <span class="h-[1px] w-16 bg-royal-gold/70"></span>
+        </div>
+        <h1 class="font-royal text-3xl sm:text-4xl text-royal-maroon font-bold tracking-tight">
+          KARUNA
+        </h1>
+      </div>
+
+      <p class="font-serif italic text-stone-600 text-sm max-w-xs mx-auto mt-2">
+        Cordially request the pleasure of your gracious presence to celebrate our new beginning
+      </p>
+
+      <!-- Date Badge -->
+      <div class="mt-4 inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-royal-maroon text-royal-lightGold border border-royal-gold text-xs tracking-wider uppercase font-medium shadow-md">
+        <i class="fa-regular fa-calendar-check text-royal-gold"></i>
+        <span>Saturday, 12th December 2026 • 12:28 PM</span>
+      </div>
+    </header>
+
+    <!-- Couple Royal Illustration / Portrait Card -->
+    <section class="px-5 py-6">
+      <div class="relative rounded-3xl overflow-hidden border-2 border-royal-gold/50 shadow-xl bg-gradient-to-b from-[#F5EFEB] to-[#FAF3E0] p-4 text-center">
+        
+        <!-- Royal arch frame -->
+        <div class="relative py-6 px-4 rounded-2xl border border-dashed border-royal-gold/60 flex flex-col items-center">
+          
+          <!-- Avatar Couple Rings Silhouette Badge -->
+          <div class="relative w-32 h-32 rounded-full border-4 border-royal-gold bg-white flex items-center justify-center shadow-inner overflow-hidden mb-3">
+            <svg class="w-24 h-24 text-royal-maroon" viewBox="0 0 100 100" fill="currentColor">
+              <!-- Traditional Bride & Groom Silhouette Icon -->
+              <path d="M50 15 A 12 12 0 0 0 38 27 C 38 33.6 43.4 39 50 39 C 56.6 39 62 33.6 62 27 A 12 12 0 0 0 50 15 Z" fill="#6A1528"/>
+              <path d="M28 50 C 28 42 35 37 42 37 L 58 37 C 65 37 72 42 72 50 L 75 75 C 75 80 70 85 64 85 L 36 85 C 30 85 25 80 25 75 Z" fill="#AA820A" opacity="0.3"/>
+              <!-- Kalash/Gathbandhan Symbolism -->
+              <circle cx="50" cy="58" r="8" fill="#BA1C38"/>
+              <path d="M42 66 L58 66 L55 82 L45 82 Z" fill="#6A1528"/>
+              <!-- Garland overlay -->
+              <path d="M35 48 Q 50 62 65 48" stroke="#D4AF37" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <h3 class="font-royal text-lg text-royal-deepMaroon">Vinit</h3>
+          <p class="text-xs text-stone-500 font-serif italic mb-1">Groom</p>
+          <span class="text-royal-gold font-script text-2xl my-0.5">&</span>
+          <h3 class="font-royal text-lg text-royal-deepMaroon">Karuna</h3>
+          <p class="text-xs text-stone-500 font-serif italic">Bride</p>
+
+          <!-- Heartfelt brother invite note -->
+          <div class="mt-4 p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-royal-gold/30 text-xs font-serif text-stone-700 leading-relaxed text-center">
+            <span class="font-semibold text-royal-ruby">A Note From Vinit's Brother:</span><br>
+            "Growing up together has been the greatest adventure of my life. Seeing my dear brother Vinit take his vows with Karuna is the happiest moment for our family. Your presence, blessings, and laughter will make this day truly unforgettable!"
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 3. LIVE WEDDING COUNTDOWN TIMER -->
+    <!-- ============================================== -->
+    <section class="px-5 py-4">
+      <div class="bg-gradient-to-r from-royal-deepMaroon via-royal-maroon to-royal-deepMaroon rounded-2xl p-5 text-white text-center shadow-lg border border-royal-gold/50 relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-royal-gold/10"></div>
+        <div class="absolute -left-6 -top-6 w-24 h-24 rounded-full bg-royal-gold/10"></div>
+
+        <p class="text-[11px] font-sans uppercase tracking-[0.25em] text-royal-lightGold mb-1">Auspicious Vivah Muhurat</p>
+        <h4 class="font-royal text-base text-white mb-3">12 December 2026 • 12:28 PM</h4>
+
+        <div class="grid grid-cols-4 gap-2 text-center max-w-xs mx-auto">
+          <div class="bg-black/25 rounded-lg py-2 border border-royal-gold/30 backdrop-blur-sm">
+            <span id="daysCount" class="block font-royal text-2xl text-royal-lightGold">00</span>
+            <span class="text-[10px] uppercase tracking-wider text-stone-300">Days</span>
+          </div>
+          <div class="bg-black/25 rounded-lg py-2 border border-royal-gold/30 backdrop-blur-sm">
+            <span id="hoursCount" class="block font-royal text-2xl text-royal-lightGold">00</span>
+            <span class="text-[10px] uppercase tracking-wider text-stone-300">Hours</span>
+          </div>
+          <div class="bg-black/25 rounded-lg py-2 border border-royal-gold/30 backdrop-blur-sm">
+            <span id="minsCount" class="block font-royal text-2xl text-royal-lightGold">00</span>
+            <span class="text-[10px] uppercase tracking-wider text-stone-300">Mins</span>
+          </div>
+          <div class="bg-black/25 rounded-lg py-2 border border-royal-gold/30 backdrop-blur-sm">
+            <span id="secsCount" class="block font-royal text-2xl text-royal-lightGold">00</span>
+            <span class="text-[10px] uppercase tracking-wider text-stone-300">Secs</span>
+          </div>
+        </div>
+
+        <!-- Add to Calendar Button -->
+        <button id="addToCalendarBtn" class="mt-4 inline-flex items-center space-x-2 text-xs text-royal-cream bg-royal-gold/20 hover:bg-royal-gold/30 active:scale-95 transition-all px-4 py-2 rounded-full border border-royal-gold/50">
+          <i class="fa-regular fa-calendar-plus text-royal-lightGold"></i>
+          <span>Save Date to Google Calendar</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 4. TIMELINE OF CEREMONIES & EVENTS -->
+    <!-- ============================================== -->
+    <section class="px-5 py-6">
+      <div class="text-center mb-6">
+        <span class="text-xs uppercase tracking-[0.25em] text-royal-ruby font-semibold">Festivities & Schedule</span>
+        <h2 class="font-royal text-2xl text-royal-maroon font-bold mt-1">Wedding Ceremonies</h2>
+        <div class="w-16 h-0.5 bg-royal-gold mx-auto mt-2"></div>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Event 1: Haldi -->
+        <div class="relative bg-white rounded-2xl p-4 shadow-sm border border-royal-gold/30 flex items-start space-x-4 transition hover:shadow-md">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-700 shrink-0 text-xl">
+            🌼
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <h3 class="font-royal text-base text-royal-deepMaroon">Haldi & Mehendi</h3>
+              <span class="text-[11px] bg-amber-50 text-amber-800 font-semibold px-2 py-0.5 rounded-full border border-amber-200">10:00 AM</span>
+            </div>
+            <p class="text-xs text-stone-500 font-medium">Friday, 11th Dec 2026</p>
+            <p class="text-xs text-stone-600 mt-1">Sunlit blessings, aromatic henna, folk melodies & turmeric joy.</p>
+            <div class="mt-2 text-[11px] text-amber-900 bg-amber-50/60 inline-block px-2 py-0.5 rounded">
+              👗 <strong>Dress Code:</strong> Festive Yellow & Green
+            </div>
+          </div>
+        </div>
+
+        <!-- Event 2: Mehndi & Sangeet -->
+        <div class="relative bg-white rounded-2xl p-4 shadow-sm border border-royal-gold/30 flex items-start space-x-4 transition hover:shadow-md">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700 shrink-0 text-xl">
+            ✨
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <h3 class="font-royal text-base text-royal-deepMaroon">Sangeet Night</h3>
+              <span class="text-[11px] bg-emerald-50 text-emerald-800 font-semibold px-2 py-0.5 rounded-full border border-emerald-200">07:00 PM</span>
+            </div>
+            <p class="text-xs text-stone-500 font-medium">Friday, 11th Dec 2026</p>
+            <p class="text-xs text-stone-600 mt-1">An evening of sparkling dance performances, music & celebration!</p>
+            <div class="mt-2 text-[11px] text-emerald-900 bg-emerald-50/60 inline-block px-2 py-0.5 rounded">
+              👗 <strong>Dress Code:</strong> Glamorous Indo-Western
+            </div>
+          </div>
+        </div>
+
+        <!-- Event 3: Barat & Phere -->
+        <div class="relative bg-gradient-to-br from-white to-[#FFF9F2] rounded-2xl p-4 shadow-md border-2 border-royal-gold/60 flex items-start space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-royal-maroon border border-royal-gold flex items-center justify-center text-royal-lightGold shrink-0 text-xl shadow">
+            👑
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-royal text-base text-royal-deepMaroon font-bold">Baraat & Vivah Muhurat</h3>
+                <span class="inline-block mt-0.5 text-[11px] font-bold text-royal-maroon bg-royal-lightGold/60 px-2 py-0.5 rounded border border-royal-gold/40">✨ Shubh Muhurat: 12:28 PM</span>
+              </div>
+              <span class="text-[11px] bg-royal-maroon text-royal-lightGold font-semibold px-2 py-0.5 rounded-full border border-royal-gold">11:00 AM</span>
+            </div>
+            <p class="text-xs text-stone-500 font-medium mt-1">Saturday, 12th Dec 2026</p>
+            <p class="text-xs text-stone-600 mt-1">Grand Baraat arrival followed by the sacred wedding vows and garland exchange at the auspicious Muhurat.</p>
+            <div class="mt-2 text-[11px] text-royal-deepMaroon bg-royal-maroon/10 inline-block px-2 py-0.5 rounded">
+              👗 <strong>Dress Code:</strong> Royal Traditional
+            </div>
+          </div>
+        </div>
+
+        <!-- Event 4: Reception & Dinner -->
+        <div class="relative bg-white rounded-2xl p-4 shadow-sm border border-royal-gold/30 flex items-start space-x-4 transition hover:shadow-md">
+          <div class="w-12 h-12 rounded-xl bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-700 shrink-0 text-xl">
+            🥂
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start">
+              <h3 class="font-royal text-base text-royal-deepMaroon">Reception & Dinner Feast</h3>
+              <span class="text-[11px] bg-rose-50 text-rose-800 font-semibold px-2 py-0.5 rounded-full border border-rose-200">07:30 PM</span>
+            </div>
+            <p class="text-xs text-stone-500 font-medium">Saturday, 12th Dec 2026</p>
+            <p class="text-xs text-stone-600 mt-1">Join us for a royal dinner and felicitation of the newlyweds Vinit & Karuna.</p>
+            <div class="mt-2 text-[11px] text-stone-700 bg-stone-100 inline-block px-2 py-0.5 rounded">
+              👗 <strong>Dress Code:</strong> Formal Celebratory Attire
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 5. VENUE & GOOGLE MAPS NAVIGATION -->
+    <!-- ============================================== -->
+    <section class="px-5 py-4">
+      <div class="bg-white rounded-2xl p-5 border border-royal-gold/40 shadow-lg text-center relative overflow-hidden">
+        
+        <div class="w-10 h-10 rounded-full bg-royal-maroon/10 text-royal-maroon mx-auto flex items-center justify-center text-lg mb-2">
+          <i class="fa-solid fa-location-dot text-royal-maroon"></i>
+        </div>
+
+        <span class="text-xs uppercase tracking-widest text-royal-ruby font-semibold">The Wedding Venue</span>
+        <h3 class="font-royal text-xl text-royal-deepMaroon mt-1">Nisargh Lawns</h3>
+        
+        <p class="text-xs text-stone-600 mt-2 max-w-xs mx-auto">
+          Nisargh Lawns, Main Celebrations Area — join us amidst nature and elegance.
+        </p>
+
+        <!-- Visual Map Preview Mockup -->
+        <div class="relative mt-4 mb-4 rounded-xl overflow-hidden border border-royal-gold/40 h-32 bg-stone-100 flex items-center justify-center shadow-inner">
+          <div class="text-center p-3">
+            <div class="text-3xl text-royal-gold mb-1">🌿</div>
+            <p class="text-xs text-stone-700 font-semibold">Nisargh Lawns</p>
+            <span class="text-[10px] text-stone-500">Tap below to open location directly in Google Maps</span>
+          </div>
+        </div>
+
+        <!-- Open Maps Button -->
+        <a id="openMapsBtn" href="https://maps.google.com/?q=Nisargh+Lawns" target="_blank" rel="noopener noreferrer" class="w-full py-3 px-4 rounded-xl bg-stone-900 text-royal-lightGold font-medium text-xs flex items-center justify-center space-x-2 shadow hover:bg-stone-800 active:scale-95 transition-all">
+          <i class="fa-solid fa-diamond-turn-right text-royal-gold"></i>
+          <span>Get Directions to Nisargh Lawns</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 6. WHATSAPP ONE-TAP RSVP CARD -->
+    <!-- ============================================== -->
+    <section class="px-5 py-6">
+      <div class="bg-gradient-to-b from-[#FFFDF9] to-[#FBF6EE] rounded-3xl p-5 border-2 border-royal-gold/60 shadow-xl">
+        <div class="text-center mb-4">
+          <span class="text-2xl">💌</span>
+          <h2 class="font-royal text-xl text-royal-maroon font-bold mt-1">RSVP on WhatsApp</h2>
+          <p class="text-xs text-stone-600 mt-1 font-serif">Kindly confirm your presence so we can reserve royal hospitality for you.</p>
+        </div>
+
+        <form id="rsvpForm" class="space-y-3" onsubmit="event.preventDefault(); submitWhatsAppRSVP();">
+          <div>
+            <label class="block text-xs font-semibold text-stone-700 mb-1">Your Full Name / Family Name</label>
+            <input type="text" id="rsvpName" required placeholder="e.g. Rahul & Family" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-royal-gold bg-white">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-stone-700 mb-1">Total Guests</label>
+              <select id="rsvpGuests" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-royal-gold bg-white">
+                <option value="1">1 Person</option>
+                <option value="2" selected>2 Persons</option>
+                <option value="3">3 Persons</option>
+                <option value="4">4 Persons</option>
+                <option value="5+">5+ Family</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-stone-700 mb-1">Attendance</label>
+              <select id="rsvpStatus" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-royal-gold bg-white">
+                <option value="Joyfully Attending">Joyfully Attending 🎉</option>
+                <option value="Attending Wedding Only">Attending Wedding Only</option>
+                <option value="Regretfully Cannot Attend">Sending Best Wishes 💕</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-stone-700 mb-1">Note / Dietary Preference (Optional)</label>
+            <input type="text" id="rsvpNote" placeholder="e.g. Jain food required / Can't wait!" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:outline-none focus:border-royal-gold bg-white">
+          </div>
+
+          <button type="submit" class="w-full mt-2 py-3 rounded-xl bg-[#25D366] text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shadow-lg hover:bg-[#20ba59] active:scale-95 transition-all cursor-pointer">
+            <i class="fa-brands fa-whatsapp text-lg"></i>
+            <span>Send RSVP via WhatsApp</span>
+          </button>
+        </form>
+
+        <div class="mt-4 pt-3 border-t border-stone-200 text-center">
+          <p class="text-[11px] text-stone-500">
+            For travel or stay assistance, call: <br>
+            <a href="tel:+919876543210" class="font-semibold text-royal-maroon hover:underline">+91 98765 43210 (Groom's Brother)</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 7. INTERACTIVE GUEST WISHES WALL -->
+    <!-- ============================================== -->
+    <section class="px-5 py-4">
+      <div class="bg-white rounded-2xl p-5 border border-royal-gold/40 shadow-md">
+        <div class="text-center mb-4">
+          <span class="text-xs uppercase tracking-widest text-royal-ruby font-semibold">Love & Blessings</span>
+          <h3 class="font-royal text-xl text-royal-deepMaroon mt-0.5">Guest Wishes Wall</h3>
+          <p class="text-xs text-stone-500 font-serif">Leave a warm message for Aarav & Diya</p>
+        </div>
+
+        <!-- Add Wish Input -->
+        <div class="space-y-2 mb-4 bg-royal-cream p-3 rounded-xl border border-royal-gold/20">
+          <input type="text" id="wishAuthor" placeholder="Your Name" class="w-full px-3 py-1.5 text-xs rounded-lg border border-stone-300 focus:outline-none focus:border-royal-gold bg-white">
+          <textarea id="wishMessage" rows="2" placeholder="Send your congratulations & blessings..." class="w-full px-3 py-1.5 text-xs rounded-lg border border-stone-300 focus:outline-none focus:border-royal-gold bg-white"></textarea>
+          <button id="postWishBtn" class="w-full py-2 bg-royal-maroon text-royal-lightGold text-xs font-semibold rounded-lg hover:bg-royal-deepMaroon active:scale-95 transition flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-heart text-xs text-pink-400"></i>
+            <span>Post Congratulations</span>
+          </button>
+        </div>
+
+        <!-- Messages Feed -->
+        <div id="wishesFeed" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+          <!-- Sample Wish 1 -->
+          <div class="p-3 rounded-xl bg-[#FFF9F2] border border-royal-gold/30 text-xs">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-royal-maroon">Pooja & Sameer</span>
+              <span class="text-[10px] text-stone-400">Just now</span>
+            </div>
+            <p class="text-stone-700 italic">"Wishing dear Vinit and Karuna endless happiness, laughter, and lifelong love! See you on 12/12/2026!"</p>
+          </div>
+          <!-- Sample Wish 2 -->
+          <div class="p-3 rounded-xl bg-[#FFF9F2] border border-royal-gold/30 text-xs">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-royal-maroon">Friends Group</span>
+              <span class="text-[10px] text-stone-400">2 hrs ago</span>
+            </div>
+            <p class="text-stone-700 italic">"Heartiest congratulations Vinit bhai & Karuna bhabhi! Super excited to dance and celebrate at Nisargh Lawns!"</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 8. WHATSAPP SHARE SHORTCUT BAR -->
+    <!-- ============================================== -->
+    <section class="px-5 py-4 text-center">
+      <div class="p-4 bg-royal-maroon/5 rounded-2xl border border-royal-gold/30">
+        <p class="text-xs text-stone-600 font-serif mb-2">Spread the joy to friends & family on WhatsApp</p>
+        <button id="shareWhatsappBtn" class="w-full py-2.5 px-4 rounded-xl bg-white border border-royal-gold text-royal-maroon text-xs font-semibold flex items-center justify-center space-x-2 shadow-sm hover:bg-royal-beige active:scale-95 transition">
+          <i class="fa-solid fa-share-nodes text-royal-gold"></i>
+          <span>Forward Invite Link on WhatsApp</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="pt-6 pb-12 text-center text-stone-500 text-xs font-serif">
+      <div class="flex justify-center items-center space-x-2 text-royal-gold text-sm mb-1">
+        <span>✦</span>
+        <span>With Love & Warm Regards</span>
+        <span>✦</span>
+      </div>
+      <p class="text-royal-maroon font-royal text-sm font-bold">Vinit & Karuna's Families</p>
+      <p class="text-[10px] text-stone-400 mt-2">Crafted with love for mobile & WhatsApp</p>
+    </footer>
+
+    <!-- Bottom Fixed Quick Action Bar (Mobile Sticky) -->
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-royal-gold/40 px-4 py-2.5 z-40 flex items-center justify-between shadow-2xl">
+      <div class="text-left">
+        <p class="text-[10px] text-stone-500 font-medium">Muhurat: 12:28 PM</p>
+        <p class="text-xs font-royal text-royal-maroon font-bold">12 Dec 2026</p>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <a href="#rsvpForm" class="px-4 py-2 rounded-full bg-royal-maroon text-royal-lightGold text-xs font-semibold border border-royal-gold shadow active:scale-95 transition">
+          RSVP Now
+        </a>
+        <a href="https://maps.google.com/?q=Nisargh+Lawns" target="_blank" class="w-8 h-8 rounded-full bg-stone-100 border border-stone-300 flex items-center justify-center text-stone-700 text-xs active:scale-95 transition" title="Nisargh Lawns Location">
+          <i class="fa-solid fa-location-arrow"></i>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    // ----------------------------------------------------
+    // 1. Audio Synthesis / Music Player (Web Audio API)
+    // ----------------------------------------------------
+    // Plays romantic classical Indian Shehnai / Sitar inspired flute arpeggios
+    let audioCtx = null;
+    let isPlaying = false;
+    let melodyInterval = null;
+
+    const ragaNotes = [
+      261.63, // C4 (Sa)
+      293.66, // D4 (Re)
+      329.63, // E4 (Ga)
+      392.00, // G4 (Pa)
+      440.00, // A4 (Dha)
+      523.25, // C5 (Sa')
+      587.33  // D5 (Re')
+    ];
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSoftNote(freq, duration = 1.2) {
+      if (!audioCtx || audioCtx.state !== 'running') return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        // Gentle envelope (soft flute/sitar chime tone)
+        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn("Audio play issue", e);
+      }
+    }
+
+    function startMelody() {
+      if (melodyInterval) clearInterval(melodyInterval);
+      let step = 0;
+      melodyInterval = setInterval(() => {
+        if (!isPlaying) return;
+        const noteIndex = Math.floor(Math.random() * ragaNotes.length);
+        playSoftNote(ragaNotes[noteIndex], 1.6);
+        step++;
+      }, 750);
+    }
+
+    function toggleMusic() {
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      
+      const icon = document.getElementById('musicIcon');
+      if (isPlaying) {
+        isPlaying = false;
+        clearInterval(melodyInterval);
+        icon.className = 'fa-solid fa-volume-xmark text-sm';
+      } else {
+        isPlaying = true;
+        startMelody();
+        icon.className = 'fa-solid fa-music text-sm animate-pulse';
+      }
+    }
+
+    document.getElementById('musicToggleBtn').addEventListener('click', toggleMusic);
+
+    // ----------------------------------------------------
+    // 2. Envelope Opening & Confetti Trigger
+    // ----------------------------------------------------
+    const openBtn = document.getElementById('openInviteBtn');
+    const envelopeModal = document.getElementById('envelopeModal');
+
+    openBtn.addEventListener('click', () => {
+      // Initialize music playback
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      isPlaying = true;
+      startMelody();
+
+      // Trigger Festive Royal Confetti (Gold and Rose petals)
+      try {
+        confetti({
+          particleCount: 80,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#D4AF37', '#BA1C38', '#F3E5AB', '#ffffff']
+        });
+      } catch (err) {}
+
+      // Fade out Envelope Modal smoothly
+      envelopeModal.style.opacity = '0';
+      setTimeout(() => {
+        envelopeModal.style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 700);
+    });
+
+    // ----------------------------------------------------
+    // 3. Floating Rose Petals Generator
+    // ----------------------------------------------------
+    const petalsContainer = document.getElementById('petalsContainer');
+    const petalEmojis = ['🌸', '✨', '🌺', '🍃', '🌼'];
+
+    function createPetal() {
+      const petal = document.createElement('div');
+      petal.className = 'petal';
+      petal.innerText = petalEmojis[Math.floor(Math.random() * petalEmojis.length)];
+      petal.style.left = Math.random() * 100 + 'vw';
+      petal.style.fontSize = (Math.random() * 14 + 10) + 'px';
+      petal.style.opacity = (Math.random() * 0.5 + 0.3).toString();
+      petal.style.animationDuration = (Math.random() * 6 + 6) + 's';
+      petal.style.animationDelay = Math.random() * 2 + 's';
+
+      petalsContainer.appendChild(petal);
+
+      setTimeout(() => {
+        petal.remove();
+      }, 12000);
+    }
+
+    // Generate gentle petals intermittently
+    setInterval(createPetal, 1400);
+
+    // ----------------------------------------------------
+    // 4. Live Wedding Countdown Timer
+    // ----------------------------------------------------
+    // Target: 12th December 2026, 12:28 PM
+    const targetDate = new Date('December 12, 2026 12:28:00').getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      let diff = targetDate - now;
+
+      if (diff < 0) {
+        diff = 0;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById('daysCount').innerText = String(days).padStart(2, '0');
+      document.getElementById('hoursCount').innerText = String(hours).padStart(2, '0');
+      document.getElementById('minsCount').innerText = String(mins).padStart(2, '0');
+      document.getElementById('secsCount').innerText = String(secs).padStart(2, '0');
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // ----------------------------------------------------
+    // 5. Add to Calendar (Google Calendar Generator)
+    // ----------------------------------------------------
+    document.getElementById('addToCalendarBtn').addEventListener('click', () => {
+      const title = encodeURIComponent("Wedding of Vinit & Karuna (Vivah Muhurat 12:28 PM)");
+      const details = encodeURIComponent("Auspicious Wedding Ceremony of Vinit & Karuna at Nisargh Lawns. Muhurat: 12:28 PM sharp.");
+      const location = encodeURIComponent("Nisargh Lawns");
+      // 12th Dec 2026: 11:30 AM to 18:30 IST (UTC: +05:30 -> 06:00 UTC to 13:00 UTC)
+      const dates = "20261212T060000Z/20261212T130000Z";
+      const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+      window.open(gcalUrl, '_blank');
+    });
+
+    // ----------------------------------------------------
+    // 6. Direct WhatsApp RSVP Integration
+    // ----------------------------------------------------
+    function submitWhatsAppRSVP() {
+      const name = document.getElementById('rsvpName').value.trim();
+      const guests = document.getElementById('rsvpGuests').value;
+      const status = document.getElementById('rsvpStatus').value;
+      const note = document.getElementById('rsvpNote').value.trim();
+
+      if (!name) return;
+
+      let message = `*Wedding RSVP - Vinit & Karuna* 💐\n\n`;
+      message += `• *Guest Name:* ${name}\n`;
+      message += `• *Attendance:* ${status}\n`;
+      message += `• *No. of Guests:* ${guests}\n`;
+      if (note) {
+        message += `• *Note:* ${note}\n`;
+      }
+      message += `\n*Venue:* Nisargh Lawns\n*Muhurat:* 12/12/2026 at 12:28 PM ✨`;
+
+      const phoneNumber = "919876543210";
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
+
+      // Confetti celebratory feedback
+      try {
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.8 }
+        });
+      } catch(e) {}
+
+      window.open(whatsappUrl, '_blank');
+    }
+
+    // ----------------------------------------------------
+    // 7. Interactive Guest Wishes Wall
+    // ----------------------------------------------------
+    document.getElementById('postWishBtn').addEventListener('click', () => {
+      const authorInput = document.getElementById('wishAuthor');
+      const msgInput = document.getElementById('wishMessage');
+      const author = authorInput.value.trim() || 'A Well-Wisher';
+      const msg = msgInput.value.trim();
+
+      if (!msg) return;
+
+      const feed = document.getElementById('wishesFeed');
+      const newCard = document.createElement('div');
+      newCard.className = "p-3 rounded-xl bg-[#FFF9F2] border border-royal-gold/30 text-xs transform transition-all duration-300 scale-95 opacity-0";
+      newCard.innerHTML = `
+        <div class="flex justify-between items-center mb-1">
+          <span class="font-bold text-royal-maroon">${escapeHtml(author)}</span>
+          <span class="text-[10px] text-emerald-600 font-semibold">Just now</span>
+        </div>
+        <p class="text-stone-700 italic">"${escapeHtml(msg)}"</p>
+      `;
+
+      feed.prepend(newCard);
+
+      setTimeout(() => {
+        newCard.classList.remove('scale-95', 'opacity-0');
+        newCard.classList.add('scale-100', 'opacity-100');
+      }, 50);
+
+      msgInput.value = '';
+      authorInput.value = '';
+
+      try {
+        confetti({
+          particleCount: 30,
+          spread: 50,
+          origin: { y: 0.7 }
+        });
+      } catch(e) {}
+    });
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[m];
+      });
+    }
+
+    // ----------------------------------------------------
+    // 8. Forward Invite link on WhatsApp
+    // ----------------------------------------------------
+    document.getElementById('shareWhatsappBtn').addEventListener('click', () => {
+      const shareText = `*Wedding Invitation - Vinit & Karuna* 💍✨\n\nWith great joy, our family invites you to celebrate the wedding of our beloved brother Vinit with Karuna!\n\n📅 Date: 12th December 2026\n⏰ Auspicious Muhurat: 12:28 PM\n📍 Venue: Nisargh Lawns\n\nTap the link below to view the interactive invitation card, event itinerary, and RSVP:\n${window.location.href}`;
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+      window.open(url, '_blank');
+    });
+  </script>
+</body>
+</html>
